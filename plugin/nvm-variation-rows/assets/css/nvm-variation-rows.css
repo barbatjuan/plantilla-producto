@@ -1,0 +1,451 @@
+/**
+ * NovaMira Variation Rows.
+ *
+ * Colours are custom properties resolved in three steps, most specific first:
+ *   1. The override set in WooCommerce > Ajustes > Productos > Filas de variación.
+ *   2. The Elementor global colour of the site, so the design system stays in charge.
+ *   3. The literal fallback below, for sites without Elementor.
+ * Nothing here is hardcoded into a rule: retune the tokens, never the selectors.
+ */
+
+/* Declared on the root, not on the components: a token defined only on .nvm-vr is undefined
+   inside the stepper, the declaration using it is dropped, and the control silently inherits
+   the theme's button colour — white on white. */
+:root {
+	--nvm-accent: var(--e-global-color-accent, #e2007a);
+	--nvm-ink: var(--e-global-color-text, #26262b);
+	--nvm-ink-muted: #84848d;
+	--nvm-line: #dcdcdf;
+	--nvm-line-strong: #b6b6bb;
+	--nvm-chip: var(--e-global-color-secondary, #2c2d31);
+	--nvm-chip-ink: #ffffff;
+	--nvm-radius: 8px;
+	--nvm-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Native markup: the select stays in the form, the table chrome does not show ──
+   This stylesheet is only enqueued on products that actually render rows, so the
+   selectors need no extra gate — and nothing flashes before the script boots. */
+
+/* The buy-box card is the only surface. A theme that also paints the cart form stacks a
+   second panel inside the first, and the two greys read as a seam the reference has not. */
+.woocommerce div.product form.cart,
+.woocommerce div.product form.cart table.variations,
+.woocommerce div.product form.cart table.variations tbody,
+.woocommerce div.product form.cart table.variations tr,
+.woocommerce div.product form.cart table.variations td,
+.woocommerce div.product form.cart .woocommerce-variation-add-to-cart {
+	background: transparent;
+	box-shadow: none;
+}
+
+/* Some themes paint buttons with a gradient image, which survives a background-color override. */
+.woocommerce div.product form.cart .single_add_to_cart_button {
+	background-image: none;
+}
+
+.woocommerce div.product form.cart table.variations {
+	display: block;
+	margin: 0 0 1rem;
+	border: 0;
+}
+
+.woocommerce div.product form.cart table.variations tbody,
+.woocommerce div.product form.cart table.variations tr,
+.woocommerce div.product form.cart table.variations td {
+	display: block;
+	width: 100%;
+	padding: 0;
+	border: 0;
+}
+
+.woocommerce div.product form.cart table.variations th.label {
+	display: none;
+}
+
+/* Hidden, not removed: WooCommerce reads and submits this field. */
+.woocommerce div.product form.cart table.variations td.value select {
+	display: none;
+}
+
+.woocommerce div.product form.cart .reset_variations {
+	display: inline-block;
+	margin-top: 0.5rem;
+	font-size: 0.75rem;
+	color: var(--nvm-ink-muted);
+}
+
+/* ── Rows ── */
+
+.nvm-vr {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border-top: 1px solid var(--nvm-line);
+}
+
+.nvm-vr__row {
+	display: grid;
+	grid-template-columns: 20px 1fr auto;
+	align-items: center;
+	gap: 6px 10px;
+	margin: 0;
+	padding: 0.55rem 0;
+	border-bottom: 1px solid var(--nvm-line);
+	color: var(--nvm-ink-muted);
+	cursor: pointer;
+	transition: color 0.25s var(--nvm-ease);
+}
+
+.nvm-vr__row.is-selected {
+	color: var(--nvm-ink);
+}
+
+.nvm-vr__row.is-unavailable {
+	opacity: 0.55;
+}
+
+.nvm-vr__row:focus-visible {
+	outline: 2px solid var(--nvm-accent);
+	outline-offset: 2px;
+}
+
+.nvm-vr__radio {
+	grid-column: 1;
+	grid-row: 1;
+	display: grid;
+	place-items: center;
+	width: 20px;
+	height: 20px;
+	border: 1.5px solid var(--nvm-line-strong);
+	border-radius: 50%;
+	transition: background 0.25s var(--nvm-ease), border-color 0.25s var(--nvm-ease);
+}
+
+.nvm-vr__row.is-selected .nvm-vr__radio {
+	background: var(--nvm-accent);
+	border-color: var(--nvm-accent);
+}
+
+.nvm-vr__radio::after {
+	content: "";
+	width: 9px;
+	height: 5px;
+	border-left: 2px solid var(--nvm-chip-ink);
+	border-bottom: 2px solid var(--nvm-chip-ink);
+	transform: rotate(-45deg) translate(1px, -1px);
+	opacity: 0;
+	transition: opacity 0.2s var(--nvm-ease);
+}
+
+.nvm-vr__row.is-selected .nvm-vr__radio::after {
+	opacity: 1;
+}
+
+.nvm-vr__labels {
+	grid-column: 2;
+	grid-row: 1;
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	flex-wrap: wrap;
+}
+
+.nvm-vr__name {
+	font-weight: 600;
+	color: inherit;
+}
+
+.nvm-vr__row.is-selected .nvm-vr__name {
+	color: var(--nvm-ink);
+}
+
+.nvm-vr__badge,
+.nvm-vr__stock {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.15rem 0.45rem;
+	border-radius: 3px;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	white-space: nowrap;
+	background: var(--nvm-chip);
+	color: var(--nvm-chip-ink);
+}
+
+.nvm-vr__stock {
+	background: transparent;
+	border: 1px solid var(--nvm-line-strong);
+	color: var(--nvm-ink-muted);
+}
+
+.nvm-vr__sale {
+	grid-column: 2;
+	grid-row: 2;
+	justify-self: start;
+	padding: 0.1rem 0.4rem;
+	border: 1px solid var(--nvm-accent);
+	border-radius: 3px;
+	font-size: 0.6875rem;
+	font-weight: 700;
+	color: var(--nvm-accent);
+	white-space: nowrap;
+}
+
+.nvm-vr__prices {
+	grid-column: 3;
+	grid-row: 1 / span 2;
+	display: grid;
+	justify-items: end;
+	gap: 0;
+	line-height: 1.25;
+	font-variant-numeric: tabular-nums;
+}
+
+.nvm-vr__old {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.75rem;
+	color: var(--nvm-ink-muted);
+}
+
+.nvm-vr__old .amount {
+	color: inherit;
+}
+
+.nvm-vr__info {
+	display: grid;
+	place-items: center;
+	width: 14px;
+	height: 14px;
+	border: 1px solid currentColor;
+	border-radius: 50%;
+	font-size: 9px;
+	font-style: normal;
+	line-height: 1;
+	cursor: help;
+}
+
+.nvm-vr__now {
+	font-size: 1.25rem;
+	font-weight: 800;
+	line-height: 1.15;
+	color: inherit;
+}
+
+.nvm-vr__unit {
+	font-size: 0.6875rem;
+	color: var(--nvm-ink-muted);
+}
+
+@media (min-width: 900px) {
+	.nvm-vr__row {
+		grid-template-columns: 20px 1fr auto auto;
+		gap: 12px;
+	}
+
+	.nvm-vr__sale {
+		grid-column: 3;
+		grid-row: 1;
+		justify-self: end;
+	}
+
+	.nvm-vr__prices {
+		grid-column: 4;
+		grid-row: 1;
+	}
+}
+
+/* ── Quantity stepper ── */
+
+.nvm-qty {
+	display: grid;
+	grid-template-columns: 28px 38px 28px;
+	align-items: center;
+	height: 38px;
+	border: 1px solid var(--nvm-line);
+	border-radius: var(--nvm-radius);
+	overflow: hidden;
+	background: #fff;
+}
+
+.nvm-qty .quantity {
+	margin: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.nvm-qty input.qty {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	text-align: center;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	color: var(--nvm-ink);
+	-moz-appearance: textfield;
+}
+
+.nvm-qty input.qty::-webkit-outer-spin-button,
+.nvm-qty input.qty::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Scoped through the wrapper: a bare .nvm-qty__btn loses to the theme's own button rules. */
+.nvm-qty .nvm-qty__btn {
+	height: 100%;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: none;
+	box-shadow: none;
+	font-size: 0.9rem;
+	font-weight: 500;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--nvm-ink-muted);
+	transition: color 0.2s var(--nvm-ease), background 0.2s var(--nvm-ease);
+}
+
+/* The theme paints every button inside form.cart white; only an explicit override wins,
+   and a losing specificity war leaves no trace in the markup — the control just vanishes. */
+.woocommerce div.product form.cart .nvm-qty .nvm-qty__btn {
+	color: var(--nvm-ink-muted) !important;
+	background: none !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+
+.nvm-qty .nvm-qty__btn--plus,
+.woocommerce div.product form.cart .nvm-qty .nvm-qty__btn--plus {
+	color: var(--nvm-accent) !important;
+}
+
+.woocommerce div.product form.cart .nvm-qty .nvm-qty__btn:hover {
+	background: none !important;
+	color: var(--nvm-ink) !important;
+}
+
+.woocommerce div.product form.cart .nvm-qty .nvm-qty__btn--plus:hover {
+	color: var(--nvm-accent) !important;
+	filter: brightness(0.88);
+}
+
+/* Colour-only feedback: a filled cell paints a hard slab whose corners escape the pill. */
+.nvm-qty .nvm-qty__btn:hover {
+	color: var(--nvm-ink);
+}
+
+.nvm-qty .nvm-qty__btn:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+}
+
+/* ── Wishlist ── */
+
+.nvm-wish {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+}
+
+.nvm-wish .elementor-widget-container,
+.nvm-wish .jet-cw,
+.nvm-wish .jet-wishlist-button__container {
+	margin: 0;
+}
+
+/* Jet paints its own coloured backdrop through two .__plane layers behind the states, so
+   styling the link alone leaves the default block visible. The planes are flattened rather
+   than removed: the plugin toggles them, and a display:none would fight its own JS. */
+.nvm-wish .jet-wishlist-button__plane {
+	background: none !important;
+	border: 0 !important;
+	box-shadow: none !important;
+}
+
+.nvm-wish .jet-wishlist-button__link {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	min-width: 0;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: var(--nvm-radius);
+	background: none !important;
+	box-shadow: none !important;
+	color: var(--nvm-ink-muted) !important;
+	transition: color 0.2s var(--nvm-ease);
+}
+
+.nvm-wish .jet-wishlist-button__link:hover,
+.nvm-wish .jet-wishlist-button__link.jet-cw-added {
+	color: var(--nvm-accent) !important;
+}
+
+.nvm-wish .jet-wishlist-button__icon svg {
+	width: 18px;
+	height: 18px;
+	fill: currentColor;
+}
+
+.nvm-wish .jet-wishlist-button__label,
+.nvm-wish .jet-wishlist-button__text {
+	display: none;
+}
+
+/* ── Total ── */
+
+.nvm-total {
+	flex: 1 1 auto;
+	margin-right: auto;
+	font-variant-numeric: tabular-nums;
+	color: var(--nvm-ink);
+}
+
+.nvm-total[hidden] {
+	display: none;
+}
+
+.nvm-total__value {
+	font-size: 1.25rem;
+	font-weight: 800;
+}
+
+.nvm-total__value .amount {
+	color: inherit;
+}
+
+.nvm-total__note {
+	display: block;
+	font-size: 0.6875rem;
+	color: var(--nvm-accent);
+}
+
+.nvm-total__note:empty {
+	display: none;
+}
+
+/* Lay the buy row out as total | quantity | button. */
+.woocommerce div.product form.cart .woocommerce-variation-add-to-cart {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.625rem 1rem;
+}
+
+.woocommerce div.product form.cart .woocommerce-variation-add-to-cart .button {
+	flex: 1 1 100%;
+}
+
+@media (min-width: 900px) {
+	.woocommerce div.product form.cart .woocommerce-variation-add-to-cart .button {
+		flex: 1 1 240px;
+	}
+}

@@ -1,0 +1,642 @@
+<title>Ficha de producto — maqueta + mapeo Elementor</title>
+<style>
+  :root{
+    /* type */
+    --font-ui: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --fs-h1: clamp(1.15rem, 1.6vw, 1.35rem);
+    --fs-body: .95rem;
+    --fs-small: .8125rem;
+    --fs-micro: .6875rem;
+    --fs-price: clamp(1.35rem, 2vw, 1.6rem);
+
+    /* color — light */
+    --c-ground:#ffffff;
+    --c-surface:#f2f2f3;
+    --c-surface-2:#e9e9eb;
+    --c-line:#dcdcdf;
+    --c-line-strong:#b6b6bb;
+    --c-ink:#26262b;
+    --c-ink-2:#4c4c55;
+    --c-ink-muted:#84848d;
+    --c-accent:#e2007a;
+    --c-accent-ink:#ffffff;
+    --c-dark-chip:#2c2d31;
+    --c-banner-a:#fbd7e7;
+    --c-banner-b:#e6dcf7;
+    --c-focus:#0a58ca;
+
+    /* space + shape */
+    --sp-xs:.375rem; --sp-s:.625rem; --sp-m:1rem; --sp-l:1.5rem; --sp-xl:2.5rem;
+    --r-card:12px; --r-btn:8px; --r-pill:999px;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --content:1440px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --c-ground:#131316;
+      --c-surface:#1c1c20;
+      --c-surface-2:#26262b;
+      --c-line:#33333a;
+      --c-line-strong:#54545e;
+      --c-ink:#f0f0f2;
+      --c-ink-2:#c9c9d0;
+      --c-ink-muted:#94949e;
+      --c-dark-chip:#3a3b42;
+      --c-banner-a:#472036;
+      --c-banner-b:#2f2a4a;
+      --c-focus:#8ab4ff;
+    }
+  }
+  :root[data-theme="dark"]{
+    --c-ground:#131316;
+    --c-surface:#1c1c20;
+    --c-surface-2:#26262b;
+    --c-line:#33333a;
+    --c-line-strong:#54545e;
+    --c-ink:#f0f0f2;
+    --c-ink-2:#c9c9d0;
+    --c-ink-muted:#94949e;
+    --c-dark-chip:#3a3b42;
+    --c-banner-a:#472036;
+    --c-banner-b:#2f2a4a;
+    --c-focus:#8ab4ff;
+  }
+
+  *{box-sizing:border-box}
+  body,h1,h2,h3,p,figure,ul,ol{margin:0}
+  ul{padding:0;list-style:none}
+  body{
+    font-family:var(--font-ui);
+    font-size:var(--fs-body);
+    line-height:1.5;
+    color:var(--c-ink);
+    background:var(--c-ground);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  :focus-visible{outline:2px solid var(--c-focus);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+  .wrap{max-width:var(--content);margin-inline:auto;padding-inline:16px}
+  @media(min-width:768px){ .wrap{padding-inline:32px} }
+
+  /* ── shell / page switcher (mockup chrome, not part of the build) ── */
+  .shell{
+    position:sticky;top:0;z-index:20;
+    display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-s);
+    padding:10px 16px;
+    background:var(--c-ground);
+    border-bottom:1px solid var(--c-line);
+  }
+  .shell__tag{
+    font-size:var(--fs-micro);letter-spacing:.09em;text-transform:uppercase;
+    color:var(--c-ink-muted);margin-right:auto;
+  }
+  .switch{
+    padding:.4rem .85rem;border-radius:var(--r-pill);
+    font-size:var(--fs-small);font-weight:600;
+    border:1px solid var(--c-line);color:var(--c-ink-2);
+    transition:background .2s var(--ease),color .2s var(--ease);
+  }
+  .switch[aria-current="true"]{background:var(--c-ink);color:var(--c-ground);border-color:var(--c-ink)}
+
+  .page{display:none;padding-block:var(--sp-l) var(--sp-xl)}
+  .page.is-active{display:block}
+
+  /* ── placeholders ── */
+  .ph{
+    display:grid;place-items:center;
+    background:var(--c-surface);
+    border:1px dashed var(--c-line-strong);
+    color:var(--c-ink-muted);
+    font-size:var(--fs-micro);text-align:center;
+    border-radius:var(--r-btn);
+  }
+
+  /* ══════════ BLOCK 1 — product hero: gallery + buy box ══════════ */
+  .pdp{
+    display:grid;
+    gap:var(--sp-l);
+    align-items:start;
+  }
+  @media(min-width:1024px){
+    .pdp{grid-template-columns:minmax(0,43fr) minmax(0,57fr);gap:var(--sp-xl)}
+  }
+
+  .gallery{display:grid;gap:var(--sp-s);position:sticky;top:64px}
+  .gallery__main{aspect-ratio:1;border-radius:var(--r-card)}
+  .gallery__thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-s)}
+  .gallery__thumbs .ph{aspect-ratio:1}
+
+  .buybox{
+    display:grid;gap:var(--sp-m);
+    padding:var(--sp-m);
+    background:var(--c-surface);
+    border-radius:var(--r-card);
+  }
+  @media(min-width:768px){ .buybox{padding:var(--sp-l)} }
+
+  .buybox__head{display:grid;grid-template-columns:1fr auto;gap:var(--sp-m)}
+  .brand{font-size:var(--fs-small);color:var(--c-ink-muted);text-decoration:none}
+  .brand:hover{text-decoration:underline}
+  .buybox__title{
+    font-size:var(--fs-h1);font-weight:700;letter-spacing:.01em;
+    text-transform:uppercase;text-wrap:balance;margin-top:2px;
+  }
+  .buybox__sub{font-size:var(--fs-small);color:var(--c-ink-muted)}
+
+  .buybox__aside{display:grid;justify-items:end;gap:var(--sp-xs);align-content:start}
+  .ph--logo{width:96px;height:34px}
+  .rating{display:flex;align-items:center;gap:6px;font-size:var(--fs-small);color:var(--c-ink-muted)}
+  .stars{color:var(--c-ink);letter-spacing:1px}
+  .stars--accent{color:var(--c-accent)}
+
+  .chip{
+    display:inline-flex;align-items:center;gap:4px;
+    padding:.2rem .5rem;border-radius:4px;
+    font-size:var(--fs-micro);font-weight:700;letter-spacing:.02em;white-space:nowrap;
+  }
+  .chip--dark{background:var(--c-dark-chip);color:#fff}
+  .chip--sale{border:1px solid var(--c-accent);color:var(--c-accent);background:transparent}
+
+  /* variant selector */
+  .variants{display:grid;border-top:1px solid var(--c-line)}
+  .variant{
+    display:grid;
+    grid-template-columns:22px 1fr auto;
+    align-items:center;gap:8px 12px;
+    padding:var(--sp-m) 0;
+    border-bottom:1px solid var(--c-line);
+    color:var(--c-ink-muted);
+    cursor:pointer;
+  }
+  .variant.is-selected{color:var(--c-ink)}
+  .radio{
+    grid-column:1;grid-row:1;
+    width:22px;height:22px;border-radius:50%;
+    border:1.5px solid var(--c-line-strong);
+    display:grid;place-items:center;
+  }
+  .is-selected .radio{background:var(--c-accent);border-color:var(--c-accent)}
+  .radio::after{
+    content:"";width:9px;height:5px;
+    border-left:2px solid var(--c-accent-ink);border-bottom:2px solid var(--c-accent-ink);
+    transform:rotate(-45deg) translate(1px,-1px);
+    opacity:0;
+  }
+  .is-selected .radio::after{opacity:1}
+
+  .variant__labels{
+    grid-column:2;grid-row:1;
+    display:flex;align-items:center;gap:var(--sp-s);flex-wrap:wrap;
+  }
+  .variant__name{font-weight:600;color:var(--c-ink)}
+  .variant:not(.is-selected) .variant__name{color:var(--c-ink-muted)}
+  .variant__sale{grid-column:2;grid-row:2;justify-self:start}
+
+  .variant__prices{
+    grid-column:3;grid-row:1 / span 2;
+    display:grid;justify-items:end;gap:2px;
+    font-variant-numeric:tabular-nums;
+  }
+  .price-old{display:flex;align-items:center;gap:5px;font-size:var(--fs-small);color:var(--c-ink-muted)}
+  .price-old s{text-decoration-thickness:1px}
+  .info{
+    display:grid;place-items:center;
+    width:14px;height:14px;border-radius:50%;
+    border:1px solid currentColor;
+    font-size:9px;font-style:normal;line-height:1;
+  }
+  .price-now{font-size:var(--fs-price);font-weight:700;line-height:1.1}
+  .price-unit{font-size:var(--fs-micro);color:var(--c-ink-muted)}
+
+  @media(min-width:900px){
+    .variant{grid-template-columns:22px 1fr auto auto;gap:12px}
+    .variant__sale{grid-column:3;grid-row:1;justify-self:end}
+    .variant__prices{grid-column:4;grid-row:1}
+  }
+
+  /* buy row */
+  .buy{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-s) var(--sp-m)}
+  .total{flex:1 1 auto;font-variant-numeric:tabular-nums}
+  .total b{font-size:var(--fs-price);font-weight:700}
+  .total small{display:block;font-size:var(--fs-micro);color:var(--c-accent)}
+  .icon-btn{
+    width:44px;height:44px;border-radius:var(--r-btn);
+    display:grid;place-items:center;font-size:1.1rem;color:var(--c-ink-2);
+    transition:background .2s var(--ease);
+  }
+  .icon-btn:hover{background:var(--c-surface-2)}
+  .qty{
+    display:grid;grid-template-columns:36px 44px 36px;align-items:center;
+    height:44px;border:1px solid var(--c-line-strong);border-radius:var(--r-btn);
+    background:var(--c-ground);
+  }
+  .qty button{height:100%;color:var(--c-ink-2)}
+  .qty span{text-align:center;font-weight:600;font-variant-numeric:tabular-nums}
+  .btn-cta{
+    flex:1 1 100%;
+    min-height:48px;padding:.75rem 1.25rem;
+    background:var(--c-accent);color:var(--c-accent-ink);
+    border-radius:var(--r-btn);
+    font-weight:700;font-size:var(--fs-small);letter-spacing:.06em;text-transform:uppercase;
+    transition:filter .25s var(--ease),transform .25s var(--ease);
+  }
+  .btn-cta:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  @media(min-width:900px){ .btn-cta{flex:1 1 240px} }
+
+  .pay{
+    flex:1 1 100%;
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    font-size:var(--fs-micro);color:var(--c-ink-muted);
+  }
+  .pay .ph{width:22px;height:14px}
+  .pay a{color:var(--c-ink-2)}
+
+  /* ══════════ BLOCK 2 — chat banner ══════════ */
+  .chatbar{
+    display:flex;align-items:center;gap:var(--sp-m);
+    margin-top:var(--sp-m);padding:var(--sp-s) var(--sp-m);
+    border-radius:var(--r-card);
+    background:linear-gradient(90deg,var(--c-banner-a),var(--c-banner-b));
+  }
+  .chatbar__avatar{width:48px;height:48px;border-radius:50%;flex:0 0 auto}
+  .chatbar__text{flex:1 1 auto;font-size:var(--fs-small);color:var(--c-ink)}
+  .chatbar__text b{font-weight:700}
+  .round-btn{
+    width:34px;height:34px;flex:0 0 auto;border-radius:50%;
+    display:grid;place-items:center;
+    background:var(--c-ground);color:var(--c-ink-2);
+    transition:transform .25s var(--ease);
+  }
+  .round-btn:hover{transform:translateY(-2px)}
+
+  /* ══════════ BLOCK 3 — info accordions ══════════ */
+  .infocards{display:grid;gap:var(--sp-m);margin-top:var(--sp-m)}
+  @media(min-width:768px){ .infocards{grid-template-columns:1fr 1fr} }
+  .infocard{
+    display:flex;align-items:center;gap:var(--sp-m);
+    padding:var(--sp-s) var(--sp-m);
+    background:var(--c-surface);border-radius:var(--r-card);
+  }
+  .infocard__icon{width:40px;height:40px;border-radius:50%;flex:0 0 auto}
+  .infocard__body{flex:1 1 auto;font-size:var(--fs-small)}
+  .infocard__body b{font-weight:700}
+  .infocard__body span{display:block;font-size:var(--fs-micro);color:var(--c-ink-muted)}
+  .infocard .round-btn{background:var(--c-surface-2)}
+
+  /* ══════════ BLOCK 4 — product tabs ══════════ */
+  .tabs{
+    display:flex;justify-content:center;align-items:flex-start;flex-wrap:wrap;gap:var(--sp-l);
+    margin-top:var(--sp-xl);padding-bottom:var(--sp-s);
+    border-bottom:1px solid var(--c-line);
+    overflow-x:auto;
+  }
+  .tab{
+    display:grid;justify-items:center;gap:2px;
+    padding-bottom:var(--sp-xs);
+    font-size:var(--fs-small);font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--c-ink-muted);white-space:nowrap;
+    border-bottom:2px solid transparent;
+  }
+  .tab[aria-selected="true"]{color:var(--c-ink);border-bottom-color:var(--c-accent)}
+
+  /* ══════════ mapping page ══════════ */
+  .doc{max-width:1100px;margin-inline:auto;display:grid;gap:var(--sp-l)}
+  .doc h2{font-size:1.35rem;font-weight:700;text-wrap:balance}
+  .doc h3{font-size:1rem;font-weight:700;margin-top:var(--sp-s)}
+  .doc p{color:var(--c-ink-2);max-width:68ch}
+  .tablewrap{overflow-x:auto;border:1px solid var(--c-line);border-radius:var(--r-card)}
+  table{border-collapse:collapse;width:100%;min-width:820px;font-size:var(--fs-small)}
+  th,td{padding:.7rem .85rem;text-align:left;vertical-align:top;border-bottom:1px solid var(--c-line)}
+  th{background:var(--c-surface);font-weight:700;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  td code{font-size:var(--fs-micro);background:var(--c-surface-2);padding:.1rem .35rem;border-radius:4px}
+  .flag{
+    display:inline-block;padding:.1rem .4rem;border-radius:4px;
+    font-size:var(--fs-micro);font-weight:700;white-space:nowrap;
+  }
+  .flag--ok{background:var(--c-surface-2);color:var(--c-ink-2)}
+  .flag--warn{border:1px solid var(--c-accent);color:var(--c-accent)}
+  .note{
+    padding:var(--sp-m);border-radius:var(--r-card);
+    background:var(--c-surface);border-left:3px solid var(--c-accent);
+  }
+  .note ul{display:grid;gap:var(--sp-xs);margin-top:var(--sp-xs)}
+  .note li{padding-left:1rem;position:relative;color:var(--c-ink-2)}
+  .note li::before{content:"";position:absolute;left:0;top:.6em;width:5px;height:5px;border-radius:50%;background:var(--c-accent)}
+</style>
+
+<header class="shell">
+  <span class="shell__tag">Preview estructural — contenido de ejemplo</span>
+  <button class="switch" data-go="maqueta" aria-current="true">Maqueta</button>
+  <button class="switch" data-go="mapeo" aria-current="false">Mapeo Elementor</button>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════════════════ PAGE: maqueta ══════════════════ -->
+  <div class="page is-active" id="maqueta">
+
+    <section class="pdp">
+      <figure class="gallery">
+        <div class="ph gallery__main">Imagen principal del producto</div>
+        <div class="gallery__thumbs">
+          <div class="ph">Vista 1</div>
+          <div class="ph">Vista 2</div>
+          <div class="ph">Vista 3</div>
+          <div class="ph">Vista 4</div>
+        </div>
+      </figure>
+
+      <div class="buybox">
+        <div class="buybox__head">
+          <div>
+            <a class="brand" href="#maqueta">Nombre de marca</a>
+            <h1 class="buybox__title">Spray solar SPF50+</h1>
+            <p class="buybox__sub">Protector solar corporal</p>
+          </div>
+          <div class="buybox__aside">
+            <div class="ph ph--logo">Logo marca</div>
+            <p class="rating"><span class="stars">★★★★☆</span> (7)</p>
+            <button class="chip chip--dark" type="button">FAQ (0)</button>
+          </div>
+        </div>
+
+        <ul class="variants">
+          <li class="variant is-selected">
+            <span class="radio"></span>
+            <span class="variant__labels">
+              <span class="variant__name">200 ml</span>
+              <span class="chip chip--dark">20% extra</span>
+            </span>
+            <span class="chip chip--sale variant__sale">-40%</span>
+            <span class="variant__prices">
+              <span class="price-old"><s>26,20 €</s><i class="info">i</i></span>
+              <span class="price-now">15,60 €</span>
+              <span class="price-unit">100 ml / 7,80 €</span>
+            </span>
+          </li>
+          <li class="variant">
+            <span class="radio"></span>
+            <span class="variant__labels">
+              <span class="variant__name">200 ml</span>
+            </span>
+            <span class="chip chip--sale variant__sale">-35%</span>
+            <span class="variant__prices">
+              <span class="price-old"><s>25,90 €</s><i class="info">i</i></span>
+              <span class="price-now">16,64 €</span>
+              <span class="price-unit">100 ml / 8,32 €</span>
+            </span>
+          </li>
+        </ul>
+
+        <div class="buy">
+          <p class="total">Total: <b>12,48 €*</b><small>*Dto. extra aplicado</small></p>
+          <button class="icon-btn" type="button" aria-label="Añadir a favoritos">&#9825;</button>
+          <div class="qty">
+            <button type="button" aria-label="Quitar una unidad">&minus;</button>
+            <span>1</span>
+            <button type="button" aria-label="Añadir una unidad">+</button>
+          </div>
+          <button class="btn-cta" type="button">Añadir a cesta</button>
+          <p class="pay">
+            <span class="ph">pay</span>
+            Paga en 3 plazos sin intereses tus compras de 20 € a 2.000 €. 0% TAE.
+            <a href="#maqueta">Más información</a>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="chatbar">
+      <div class="ph chatbar__avatar">foto</div>
+      <p class="chatbar__text">¿Quieres más información de este producto? <b>Nuestro chat te responde</b></p>
+      <button class="round-btn" type="button" aria-label="Abrir chat">&#8600;</button>
+    </section>
+
+    <section class="infocards">
+      <div class="infocard">
+        <div class="ph infocard__icon">ico</div>
+        <p class="infocard__body"><b>Packs oferta:</b> ver productos comprados juntos habitualmente</p>
+        <button class="round-btn" type="button" aria-label="Desplegar packs oferta">&#8595;</button>
+      </div>
+      <div class="infocard">
+        <div class="ph infocard__icon">ico</div>
+        <p class="infocard__body"><span>Entrega prevista:</span> <b>Península: lunes 17/08/2026</b></p>
+        <button class="round-btn" type="button" aria-label="Desplegar plazos de entrega">+</button>
+      </div>
+    </section>
+
+    <nav class="tabs">
+      <button class="tab" type="button" aria-selected="true">Descripción</button>
+      <button class="tab" type="button" aria-selected="false">Características</button>
+      <button class="tab" type="button" aria-selected="false">
+        <span>Valoraciones</span>
+        <span class="stars stars--accent">★★★★☆ (7)</span>
+      </button>
+      <button class="tab" type="button" aria-selected="false">FAQ (0)</button>
+    </nav>
+  </div>
+
+  <!-- ══════════════════ PAGE: mapeo ══════════════════ -->
+  <div class="page" id="mapeo">
+    <div class="doc">
+      <div>
+        <h2>Mapeo a widgets nativos — Elementor Pro + Crocoblock</h2>
+        <p>
+          La ficha se construye como plantilla <b>Single Product</b> del Theme Builder, condición
+          <code>include/product</code>. Un contenedor por sección de la maqueta: <code>pdp</code>,
+          <code>chatbar</code>, <code>infocards</code>, <code>tabs</code>. Sin HTML pegado: cada pieza
+          es un widget editable.
+        </p>
+      </div>
+
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Elemento de la maqueta</th>
+              <th>Widget nativo (Elementor/Woo)</th>
+              <th>Alternativa Crocoblock</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Galería + miniaturas</td>
+              <td><code>woocommerce-product-images</code></td>
+              <td>JetProductGallery (slider, zoom, thumbs verticales)</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Marca (enlace superior)</td>
+              <td>—</td>
+              <td>JetEngine Dynamic Field → taxonomía <code>marca</code>, enlace al archivo</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Título</td>
+              <td><code>woocommerce-product-title</code></td>
+              <td>JetWooBuilder Product Title</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Subtítulo (“Protector solar corporal”)</td>
+              <td>—</td>
+              <td>JetEngine Dynamic Field → meta <code>subtitulo</code></td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Estrellas + nº de reseñas</td>
+              <td><code>woocommerce-product-rating</code></td>
+              <td>JetWooBuilder Product Rating</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Logo de marca</td>
+              <td>—</td>
+              <td>JetEngine Dynamic Image → imagen del término de marca</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Chip “FAQ (0)”</td>
+              <td>Botón con enlace ancla a la pestaña FAQ</td>
+              <td>JetTabs (control externo) o JetPopup como disparador</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td><b>Filas de variante con precio propio</b></td>
+              <td><code>woocommerce-product-add-to-cart</code> — renderiza <code>&lt;select&gt;</code>, no filas</td>
+              <td>JetWooBuilder Single Add To Cart + plugin de swatches (radio) + CSS de la maqueta</td>
+              <td><span class="flag flag--warn">requiere plugin</span></td>
+            </tr>
+            <tr>
+              <td>Chip “20% extra” por variante</td>
+              <td>—</td>
+              <td>JetEngine meta de variación + visibilidad dinámica</td>
+              <td><span class="flag flag--warn">requiere snippet</span></td>
+            </tr>
+            <tr>
+              <td>Pill “-40%”</td>
+              <td>Badge de oferta de Woo (solo texto “¡Oferta!”)</td>
+              <td>JetEngine Dynamic Field con callback de % (regular vs sale)</td>
+              <td><span class="flag flag--warn">requiere snippet</span></td>
+            </tr>
+            <tr>
+              <td>Precio tachado + precio actual</td>
+              <td><code>woocommerce-product-price</code></td>
+              <td>JetWooBuilder Product Price</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Precio por unidad (100 ml / 7,80 €)</td>
+              <td>—</td>
+              <td>JetEngine Dynamic Field calculado (precio ÷ volumen)</td>
+              <td><span class="flag flag--warn">requiere snippet</span></td>
+            </tr>
+            <tr>
+              <td>Total + nota “Dto. extra aplicado”</td>
+              <td>—</td>
+              <td>JetEngine Dynamic Field + visibilidad condicional por descuento activo</td>
+              <td><span class="flag flag--warn">requiere snippet</span></td>
+            </tr>
+            <tr>
+              <td>Corazón de favoritos</td>
+              <td>—</td>
+              <td>JetCompareWishlist → Add to Wishlist</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Selector de cantidad + CTA</td>
+              <td><code>woocommerce-product-add-to-cart</code> (cantidad activa)</td>
+              <td>JetWooBuilder Single Add To Cart</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Línea de pago aplazado</td>
+              <td>Icono + texto (widget Icon Box)</td>
+              <td>Banner propio de la pasarela si lo ofrece</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Banner de chat degradado</td>
+              <td>Contenedor con degradado + Image + Text + Button</td>
+              <td>JetPopup como disparador del chat</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Tarjetas “Packs oferta” / “Entrega prevista”</td>
+              <td>Accordion (dos contenedores al 50%)</td>
+              <td>JetTabs → Accordion, un ítem por tarjeta</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+            <tr>
+              <td>Pestañas inferiores</td>
+              <td><code>woocommerce-product-data-tabs</code></td>
+              <td>JetTabs (control del contador de reseñas en la etiqueta)</td>
+              <td><span class="flag flag--ok">1:1</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note">
+        <h3>Lo que no sale nativo y hay que decidir</h3>
+        <ul>
+          <li>
+            <b>La lista de variantes es el único punto duro.</b> Woo entrega variaciones como
+            desplegable. Para filas seleccionables con precio, badge y precio por unidad hacen falta
+            swatches en modo radio y un hook que imprima el precio de cada variación en su fila.
+          </li>
+          <li>
+            <b>Alternativa sin plugin de swatches:</b> tratar cada formato como producto simple y
+            listar los hermanos con un JetEngine Listing Grid. Todo nativo, pero se pierde el carrito
+            de variación y hay que enlazar los productos entre sí.
+          </li>
+          <li>
+            <b>Los porcentajes y el precio por unidad son campos calculados.</b> O se guardan como meta
+            al guardar el producto, o se resuelven con callbacks de JetEngine. No los dejes como texto fijo.
+          </li>
+          <li>
+            <b>Higiene de contenedores:</b> cuatro contenedores de primer nivel, nada más. Es una
+            plantilla que se sirve en cada producto del catálogo: cada nivel de más se paga en todas
+            las fichas del sitio.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.querySelectorAll(".switch").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var target = btn.dataset.go;
+      document.querySelectorAll(".page").forEach(function (p) {
+        p.classList.toggle("is-active", p.id === target);
+      });
+      document.querySelectorAll(".switch").forEach(function (b) {
+        b.setAttribute("aria-current", String(b === btn));
+      });
+      window.scrollTo({ top: 0 });
+    });
+  });
+
+  document.querySelectorAll(".variant").forEach(function (row) {
+    row.addEventListener("click", function () {
+      document.querySelectorAll(".variant").forEach(function (r) {
+        r.classList.toggle("is-selected", r === row);
+      });
+    });
+  });
+
+  document.querySelectorAll(".tab").forEach(function (tab) {
+    tab.addEventListener("click", function () {
+      document.querySelectorAll(".tab").forEach(function (t) {
+        t.setAttribute("aria-selected", String(t === tab));
+      });
+    });
+  });
+</script>
