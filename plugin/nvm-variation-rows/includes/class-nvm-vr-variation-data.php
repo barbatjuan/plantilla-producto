@@ -41,11 +41,14 @@ class NVM_VR_Variation_Data {
 	 * @return array<string,mixed>
 	 */
 	public static function build( $variation ) {
-		$price   = (float) wc_get_price_to_display( $variation );
-		$regular = (float) wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) );
+		// The percentage comes from NVM_VR_Discount so the row and the product card can never
+		// advertise two different discounts for the same variation.
+		$discount = NVM_VR_Discount::get( $variation );
 
-		$has_discount = $regular > 0 && $regular > $price;
-		$discount_pct = $has_discount ? (int) round( ( ( $regular - $price ) / $regular ) * 100 ) : 0;
+		$price        = $discount['price'];
+		$regular      = $discount['regular'];
+		$has_discount = $discount['has_discount'];
+		$discount_pct = $discount['pct'];
 
 		$extra_pct = NVM_VR_Variation_Meta::get_extra_pct( $variation->get_id() );
 		$has_extra = $extra_pct > 0;
@@ -57,7 +60,7 @@ class NVM_VR_Variation_Data {
 			'regular_html'   => $has_discount ? wc_price( $regular ) : '',
 			'has_discount'   => $has_discount,
 			'discount_pct'   => $discount_pct,
-			'discount_label' => $has_discount ? sprintf( '-%d%%', $discount_pct ) : '',
+			'discount_label' => $discount['label'],
 			'unit_html'      => self::unit_price_html( $variation, $price ),
 			'badge'          => NVM_VR_Variation_Meta::get_badge( $variation->get_id() ),
 			'extra_pct'      => $extra_pct,

@@ -1,0 +1,27 @@
+/**
+ * NovaMira design tokens.
+ *
+ * Colours are custom properties resolved in three steps, most specific first:
+ *   1. The override set in WooCommerce > Ajustes > Productos > Filas de variación.
+ *   2. The Elementor global colour of the site, so the design system stays in charge.
+ *   3. The literal fallback below, for sites without Elementor.
+ * Nothing is hardcoded into a rule: retune the tokens, never the selectors.
+ *
+ * Declared on the root, not on the components: a token defined only on .nvm-vr is undefined
+ * inside the stepper or inside a product card, the declaration using it is dropped, and the
+ * control silently inherits the theme's colour — white on white. Its own file because the
+ * single product page and the archive both need it and neither loads the other's stylesheet.
+ */
+
+:root {
+	--nvm-accent: var(--e-global-color-accent, #e2007a);
+	--nvm-ink: var(--e-global-color-text, #26262b);
+	--nvm-ink-muted: #84848d;
+	--nvm-line: #dcdcdf;
+	--nvm-line-strong: #b6b6bb;
+	--nvm-chip: var(--e-global-color-secondary, #2c2d31);
+	--nvm-chip-ink: #ffffff;
+	--nvm-surface: #f4f5f3;
+	--nvm-radius: 8px;
+	--nvm-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

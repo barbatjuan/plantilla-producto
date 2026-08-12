@@ -1,0 +1,260 @@
+/**
+ * Product card on the archive.
+ *
+ * The card is composed with Elementor and JetWooBuilder widgets; this file only fixes the
+ * things a widget control cannot express, and it reads the same tokens as the buy box so the
+ * two pages cannot drift apart.
+ *
+ * Several rules below are deliberately over-specific. Elementor compiles a rule per widget
+ * control at `.elementor-<tpl> .elementor-element-<id> …`, which outranks anything written
+ * with a plain class; matching that weight is the only way a stylesheet wins without
+ * scattering !important through the file.
+ */
+
+/* ── The card is one surface ──────────────────────────────────────────────────
+   A photo on its own panel inside a white card reads as a picture pasted onto a card. One
+   background across the whole tile is what makes the product look like it is sitting on the
+   card rather than in a frame — which is why the image area repeats the card colour instead
+   of painting its own. */
+
+.nvm-card {
+	height: 100%;
+	overflow: hidden;
+	border-radius: 4px;
+	text-align: center;
+}
+
+.nvm-card,
+.nvm-card__media {
+	background-color: var(--nvm-surface, #f4f5f3);
+}
+
+/* ── Image frame ──────────────────────────────────────────────────────────────
+   A fixed portrait ratio, not a fixed height: product photos arrive at every size and a
+   height alone lets a wide one squash while a tall one overflows. With the ratio on the
+   frame and `contain` on the image, every card lines up whatever the source. */
+
+.nvm-card__media {
+	position: relative;
+	padding: 8px;
+}
+
+.nvm-card__media .jet-woo-builder-archive-product-thumbnail__wrapper {
+	width: 100%;
+}
+
+.nvm-card__media .jet-woo-builder-archive-product-thumbnail {
+	display: block;
+	aspect-ratio: 3 / 4;
+	overflow: hidden;
+}
+
+/* WooCommerce wraps the image in a link. Left at its intrinsic size the anchor is shorter
+   than the frame, so the image it contains can never fill the ratio above. */
+.nvm-card__media .jet-woo-builder-archive-product-thumbnail a {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* The selector is long because it has to be: `.woocommerce ul.products li.product a img`
+   forces height:auto, which leaves the photo sitting at the top of the frame with a band of
+   dead space under it. Filling the frame is the whole point of fixing its ratio. */
+.woocommerce ul.products li.product .nvm-card__media .jet-woo-builder-archive-product-thumbnail img,
+.nvm-card__media .jet-woo-builder-archive-product-thumbnail img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	object-fit: contain;
+	object-position: center;
+	transition: transform 0.45s var(--nvm-ease, ease);
+}
+
+.jet-woo-builder-product:hover .nvm-card__media .jet-woo-builder-archive-product-thumbnail img {
+	transform: scale(1.04);
+}
+
+/* ── Badges ───────────────────────────────────────────────────────────────────
+   Absolute so they sit over the photo, and pointer-events off so a badge never swallows the
+   click that should open the product. */
+
+.nvm-badges {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 4px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	pointer-events: none;
+}
+
+.nvm-badges__item {
+	padding: 2px 6px;
+	border-radius: 3px;
+	background: var(--nvm-badge-bg, var(--nvm-chip, #2c2d31));
+	color: var(--nvm-badge-fg, var(--nvm-chip-ink, #fff));
+	font-size: 10px;
+	font-weight: 700;
+	line-height: 1.6;
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+
+/* ── Text block ───────────────────────────────────────────────────────────────
+   Centred on the block, not just on the box: a two-line title left-aligned under a centred
+   brand is the single most visible break in a grid of cards. */
+
+.nvm-card__body {
+	flex-grow: 1;
+	text-align: center;
+}
+
+.nvm-card__body,
+.nvm-card__body * {
+	text-align: center;
+}
+
+.nvm-brand {
+	display: block;
+	color: var(--nvm-ink-muted, #84848d);
+	font-size: 13px;
+	font-weight: 400;
+	line-height: 1.4;
+	text-decoration: none;
+}
+
+/* Two lines, always. Clamping is what keeps the rows of a grid aligned; without it one long
+   name pushes its own price out of step with every neighbour.
+   Size, weight and colour are NOT set here — they are widget controls on the template, so the
+   shop owner can retune them in Elementor without touching a stylesheet. */
+.woocommerce ul.products li.product .nvm-card .jet-woo-builder-archive-product-title,
+.nvm-card .jet-woo-builder-archive-product-title {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	/* Two lines of room whether the name needs one or two. Clamping alone caps the tall card;
+	   reserving the second line is what stops the short one from riding up and leaving its
+	   price out of line with the rest of the row. Set in em so it follows the widget's own
+	   font size instead of hardcoding a second copy of it. */
+	min-height: 2.7em;
+}
+
+.nvm-card .jet-woo-builder-archive-product-title a,
+.elementor .nvm-card .jet-woo-builder-archive-product-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.nvm-card .jet-woo-builder-archive-cats,
+.elementor .nvm-card .jet-woo-builder-archive-cats {
+	color: var(--nvm-ink-muted, #84848d);
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.nvm-card .jet-woo-builder-archive-cats ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.nvm-card .jet-woo-builder-archive-cats li {
+	display: inline;
+	margin: 0;
+}
+
+.nvm-card .jet-woo-builder-archive-cats a,
+.elementor .nvm-card .jet-woo-builder-archive-cats a {
+	color: inherit;
+	text-decoration: none;
+}
+
+/* ── Rating ───────────────────────────────────────────────────────────────────
+   The row is printed on every card, rated or not. An empty star row costs one line of grey;
+   a missing one shortens that card and misaligns the price of everything beside it. */
+
+.nvm-card__rating {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	min-height: 16px;
+	line-height: 1;
+}
+
+.nvm-rating-count {
+	color: var(--nvm-ink-muted, #84848d);
+	font-size: 12px;
+	line-height: 1;
+}
+
+/* ── Price row ────────────────────────────────────────────────────────────────
+   Type and colour of <del> and <ins> come from the price widget's own controls on the
+   template. Only the layout is here — a flex row that keeps "23,90 € 13,29 € -44%" on one
+   baseline and lets it wrap as a block on a narrow card. */
+
+.nvm-card__price {
+	margin-top: auto;
+}
+
+.nvm-card__price .jet-woo-builder-archive-product-price,
+.nvm-card__price .jet-woo-product-price {
+	display: flex;
+	align-items: baseline;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: 7px;
+}
+
+/* WooCommerce ships <ins> at 0.6 opacity in some themes; a struck price that faint reads as
+   disabled rather than as the price that no longer applies. */
+.jet-woo-builder-product .nvm-card__price del,
+.jet-woo-builder-product .nvm-card__price ins {
+	background: none;
+	opacity: 1;
+}
+
+/* "Desde" introduces the price of a variable product, so it belongs with the small type and
+   not with the figure it introduces. */
+.nvm-card__price .nvm-price-from {
+	color: var(--nvm-ink-muted, #84848d);
+	font-size: 13px;
+	font-weight: 400;
+}
+
+/* The tax suffix is a legal note for the product page. Repeated on twenty cards it is noise
+   competing with the figure the shopper is scanning for. */
+.nvm-card__price .woocommerce-price-suffix {
+	display: none;
+}
+
+.nvm-pill {
+	color: var(--nvm-accent, #e2007a);
+	font-size: 13px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+/* ── Equal height ─────────────────────────────────────────────────────────────
+   Cards in a row must end on the same line or the grid reads as broken. The card stretches
+   to the tallest of its row and the price row is pushed to the bottom of whatever is left. */
+
+.jet-woo-builder-product > .elementor,
+.jet-woo-builder-product > .elementor > .e-con {
+	height: 100%;
+}
+
+.woocommerce ul.products li.product.jet-woo-builder-product {
+	display: flex;
+	flex-direction: column;
+}

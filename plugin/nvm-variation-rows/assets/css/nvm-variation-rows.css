@@ -1,27 +1,9 @@
 /**
  * NovaMira Variation Rows.
  *
- * Colours are custom properties resolved in three steps, most specific first:
- *   1. The override set in WooCommerce > Ajustes > Productos > Filas de variación.
- *   2. The Elementor global colour of the site, so the design system stays in charge.
- *   3. The literal fallback below, for sites without Elementor.
- * Nothing here is hardcoded into a rule: retune the tokens, never the selectors.
+ * The colour tokens this file consumes live in nvm-tokens.css, which is registered as a
+ * dependency: the archive card needs the same tokens and does not load this stylesheet.
  */
-
-/* Declared on the root, not on the components: a token defined only on .nvm-vr is undefined
-   inside the stepper, the declaration using it is dropped, and the control silently inherits
-   the theme's button colour — white on white. */
-:root {
-	--nvm-accent: var(--e-global-color-accent, #e2007a);
-	--nvm-ink: var(--e-global-color-text, #26262b);
-	--nvm-ink-muted: #84848d;
-	--nvm-line: #dcdcdf;
-	--nvm-line-strong: #b6b6bb;
-	--nvm-chip: var(--e-global-color-secondary, #2c2d31);
-	--nvm-chip-ink: #ffffff;
-	--nvm-radius: 8px;
-	--nvm-ease: cubic-bezier(0.22, 1, 0.36, 1);
-}
 
 /* ── Native markup: the select stays in the form, the table chrome does not show ──
    This stylesheet is only enqueued on products that actually render rows, so the

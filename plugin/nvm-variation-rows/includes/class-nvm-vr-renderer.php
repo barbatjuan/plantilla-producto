@@ -189,18 +189,14 @@ class NVM_VR_Renderer {
 			return;
 		}
 
+		NVM_VR_Settings::enqueue_tokens();
+
 		wp_enqueue_style(
 			'nvm-variation-rows',
 			NVM_VR_URL . 'assets/css/nvm-variation-rows.css',
-			array(),
+			array( 'nvm-tokens' ),
 			NVM_VR_VERSION
 		);
-
-		$inline = NVM_VR_Settings::get_inline_css();
-
-		if ( '' !== $inline ) {
-			wp_add_inline_style( 'nvm-variation-rows', $inline );
-		}
 
 		wp_enqueue_script(
 			'nvm-variation-rows',

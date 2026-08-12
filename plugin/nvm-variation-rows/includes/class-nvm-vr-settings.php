@@ -79,6 +79,12 @@ class NVM_VR_Settings {
 				'desc'    => __( 'Texto sobre la etiqueta destacada y check del radio.', 'nvm-variation-rows' ),
 				'default' => '#ffffff',
 			),
+			'surface'     => array(
+				'var'     => '--nvm-surface',
+				'label'   => __( 'Fondo de tarjeta', 'nvm-variation-rows' ),
+				'desc'    => __( 'Fondo de la tarjeta de producto en el listado, imagen incluida.', 'nvm-variation-rows' ),
+				'default' => '#f4f5f3',
+			),
 		);
 
 		return apply_filters( 'nvm_vr_css_tokens', $tokens );
@@ -138,7 +144,31 @@ class NVM_VR_Settings {
 	}
 
 	/**
-	 * Inline CSS with the resolved tokens, appended after the plugin stylesheet.
+	 * Enqueue the token sheet and the overrides that pin it.
+	 *
+	 * Both the buy box and the product card depend on this handle, and a single product page
+	 * asks for it twice. Adding the inline block on each call would print the overrides twice;
+	 * the flag makes the second call the no-op it should be.
+	 */
+	public static function enqueue_tokens() {
+		static $done = false;
+
+		wp_enqueue_style( 'nvm-tokens', NVM_VR_URL . 'assets/css/nvm-tokens.css', array(), NVM_VR_VERSION );
+
+		if ( $done ) {
+			return;
+		}
+
+		$done   = true;
+		$inline = self::get_inline_css();
+
+		if ( '' !== $inline ) {
+			wp_add_inline_style( 'nvm-tokens', $inline );
+		}
+	}
+
+	/**
+	 * Inline CSS with the resolved tokens, appended after the token stylesheet.
 	 *
 	 * @return string Empty when nothing is overridden.
 	 */
