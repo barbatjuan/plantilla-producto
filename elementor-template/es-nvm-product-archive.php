@@ -256,15 +256,26 @@ function nvm_arch_build_card() {
 							array(
 								// Empty stars are printed on purpose: an unrated card without the
 								// row is one line shorter and knocks its whole row out of line.
+								//
+								// Jet ships fourteen star sets under names that say nothing —
+								// "Rating 1" to "Rating 14". They are the same shapes drawn hollow,
+								// half and solid: 1/2/3 are one star, 4/5/6 the next, and so on.
+								// Rating 1, the default, is the hollow one, and the widget draws
+								// the rated overlay with the SAME glyph — so a four-star product
+								// gets four hollow stars in a darker grey, which reads as nothing
+								// at card size. Rating 3 is that star filled in, and the rating
+								// then reads the way every shopper expects: solid accent up to the
+								// score, solid pale grey after it.
 								nvm_arch_w(
 									$seed,
 									'jet-woo-builder-archive-product-rating',
 									array(
 										'show_empty_rating'           => 'yes',
+										'archive_rating_icon'         => 'jetwoo-front-icon-rating-3',
 										'archive_stars_font_size'     => nvm_arch_size( 13 ),
 										'archive_stars_space_between' => nvm_arch_size( 2 ),
 										'stars_archive_color_all'     => $faint,
-										'archive_stars_color_rated'   => $muted,
+										'archive_stars_color_rated'   => $green,
 										'archive_stars_color_empty'   => $faint,
 										'archive_stars_alignment'     => 'center',
 									)

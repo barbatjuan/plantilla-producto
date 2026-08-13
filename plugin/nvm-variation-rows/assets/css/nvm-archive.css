@@ -30,9 +30,15 @@
 }
 
 /* ── Image frame ──────────────────────────────────────────────────────────────
-   A fixed portrait ratio, not a fixed height: product photos arrive at every size and a
-   height alone lets a wide one squash while a tall one overflows. With the ratio on the
-   frame and `contain` on the image, every card lines up whatever the source. */
+   A fixed ratio, not a fixed height: product photos arrive at every size and a height alone
+   lets a wide one squash while a tall one overflows. With the ratio on the frame and
+   `contain` on the image, every card lines up whatever the source.
+
+   The ratio is a variable because it is a catalogue decision, not a design one. `contain`
+   never crops, so whatever the frame is taller than the photo becomes empty card — a
+   portrait frame over a catalogue of landscape packshots reads as a band of dead space
+   under every photo. Square is the compromise that costs little on either shape; set it to
+   4/3 for a catalogue that is landscape throughout, or 3/4 for bottles and boxes. */
 
 .nvm-card__media {
 	position: relative;
@@ -45,7 +51,7 @@
 
 .nvm-card__media .jet-woo-builder-archive-product-thumbnail {
 	display: block;
-	aspect-ratio: 3 / 4;
+	aspect-ratio: var(--nvm-card-media-ratio, 1 / 1);
 	overflow: hidden;
 }
 

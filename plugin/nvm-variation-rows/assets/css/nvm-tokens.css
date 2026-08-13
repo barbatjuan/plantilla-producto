@@ -22,6 +22,7 @@
 	--nvm-chip: var(--e-global-color-secondary, #2c2d31);
 	--nvm-chip-ink: #ffffff;
 	--nvm-surface: #f4f5f3;
+	--nvm-card-media-ratio: 1 / 1;
 	--nvm-radius: 8px;
 	--nvm-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }

@@ -80,6 +80,20 @@ different data for every product.
 colour per term. A product can carry several, and the wording and colours are edited once on the
 term rather than on every product.
 
+**The image frame is a catalogue decision.** `--nvm-card-media-ratio` (default `1 / 1`) fixes the
+ratio of every card's photo area; the photo is scaled to fit inside it and never cropped. Fixing it
+is what keeps a row of cards aligned, but it also means any part of the frame the photo does not
+reach becomes empty card. Match it to the catalogue — `4 / 3` for landscape packshots, `3 / 4` for
+bottles and boxes — or a portrait frame over landscape photos leaves a band of dead space under
+every one of them.
+
+**Stars: use a filled glyph.** JetWooBuilder's rating widget draws the score by stacking a second
+row of stars clipped to a percentage, and it draws that row with the *same* glyph as the empty one.
+Left on the default `Rating 1`, which is a hollow star, a four-star product shows four hollow stars
+in a slightly darker grey — invisible at card size. The sets come in threes (hollow, half, solid) of
+the same shape, so `Rating 3` is the filled version of the default star. The card uses it, with the
+score in the accent colour and the remainder in pale grey.
+
 **The percentage has one source.** `NVM_VR_Discount` computes it, and both the variation rows and
 the card call it. Two implementations would drift the first time the rule changed — rounding, tax
 mode, what a variable product's headline price is — and the archive would keep advertising a
