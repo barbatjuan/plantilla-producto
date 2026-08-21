@@ -26,6 +26,14 @@
 	background-image: none;
 }
 
+/* Undeclared by default: the var() fallback is what keeps the button untouched until the
+   admin sets a color in Ajustes > Productos > Filas de variación — there is no button-bg
+   default in nvm-tokens.css on purpose. */
+.woocommerce div.product form.cart .single_add_to_cart_button {
+	background-color: var(--nvm-button-bg, unset);
+	color: var(--nvm-button-ink, unset);
+}
+
 .woocommerce div.product form.cart table.variations {
 	display: block;
 	margin: 0 0 1rem;

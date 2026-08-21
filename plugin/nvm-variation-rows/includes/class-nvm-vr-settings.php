@@ -85,6 +85,18 @@ class NVM_VR_Settings {
 				'desc'    => __( 'Fondo de la tarjeta de producto en el listado, imagen incluida.', 'nvm-variation-rows' ),
 				'default' => '#f4f5f3',
 			),
+			'button_bg'   => array(
+				'var'     => '--nvm-button-bg',
+				'label'   => __( 'Fondo del botón', 'nvm-variation-rows' ),
+				'desc'    => __( 'Botón Añadir al carrito. Vacío hereda el color del tema.', 'nvm-variation-rows' ),
+				'default' => '',
+			),
+			'button_ink'  => array(
+				'var'     => '--nvm-button-ink',
+				'label'   => __( 'Texto del botón', 'nvm-variation-rows' ),
+				'desc'    => __( 'Texto del botón Añadir al carrito.', 'nvm-variation-rows' ),
+				'default' => '',
+			),
 		);
 
 		return apply_filters( 'nvm_vr_css_tokens', $tokens );
@@ -134,6 +146,18 @@ class NVM_VR_Settings {
 				'css'      => 'width:6em;',
 			);
 		}
+
+		$fields[] = array(
+			'title' => __( 'Reconstruir plantilla del listado', 'nvm-variation-rows' ),
+			'type'  => 'title',
+			'desc'  => __( 'Regenera la tarjeta y la página de archivo de JetWooBuilder. Solo hace falta después de un cambio de estructura del card, no por cambiar un color: los colores de arriba se leen en vivo.', 'nvm-variation-rows' ),
+			'id'    => self::OPTION_PREFIX . 'rebuild_section',
+		);
+
+		$fields[] = array(
+			'type' => 'nvm_rebuild_button',
+			'id'   => self::OPTION_PREFIX . 'rebuild',
+		);
 
 		$fields[] = array(
 			'type' => 'sectionend',
