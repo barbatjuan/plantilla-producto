@@ -1,0 +1,5 @@
+# Git hooks are run by sh, and sh on Windows does not tolerate CRLF: a `#!/bin/sh` line ending
+# in a carriage return is read as an interpreter that does not exist, and every hook here dies
+# with "bad interpreter" on a clone that converts line endings. Pin them to LF.
+.githooks/** text eol=lf
+*.sh        text eol=lf
