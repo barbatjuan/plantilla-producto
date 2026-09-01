@@ -2,7 +2,7 @@
 /**
  * Plugin Name:          NovaMira Variation Rows for WooCommerce
  * Description:          Renders variable product variations as selectable rows with per-variation price, discount badge and unit price, and applies the extra discount as a real cart rule. Also supplies the product card on the archive with its brand, highlight labels and discount pill. The native WooCommerce variation form stays in charge.
- * Version:              1.2.0
+ * Version:              1.3.0
  * Author:               Juan Barbat
  * License:              GPL-2.0-or-later
  * License URI:          https://www.gnu.org/licenses/gpl-2.0.html
@@ -18,7 +18,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'NVM_VR_VERSION', '1.2.0' );
+define( 'NVM_VR_VERSION', '1.3.0' );
 define( 'NVM_VR_FILE', __FILE__ );
 define( 'NVM_VR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'NVM_VR_URL', plugin_dir_url( __FILE__ ) );
@@ -55,6 +55,7 @@ function nvm_vr_bootstrap() {
 	require_once NVM_VR_PATH . 'includes/class-nvm-vr-archive.php';
 	require_once NVM_VR_PATH . 'includes/class-nvm-vr-archive-builder.php';
 	require_once NVM_VR_PATH . 'includes/class-nvm-vr-quantity.php';
+	require_once NVM_VR_PATH . 'includes/class-nvm-vr-mini-cart.php';
 	require_once NVM_VR_PATH . 'includes/class-nvm-vr-wishlist.php';
 	require_once NVM_VR_PATH . 'includes/class-nvm-vr-extra-discount.php';
 
@@ -67,6 +68,7 @@ function nvm_vr_bootstrap() {
 	NVM_VR_Archive::init();
 	NVM_VR_Archive_Builder::init();
 	NVM_VR_Quantity::init();
+	NVM_VR_Mini_Cart::init();
 	NVM_VR_Wishlist::init();
 	NVM_VR_Extra_Discount::init();
 }

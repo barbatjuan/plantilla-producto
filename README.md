@@ -12,7 +12,7 @@ and the struck price, all reading the same numbers as the product page.
 
 | Piece | What it delivers |
 | --- | --- |
-| `plugin/nvm-variation-rows` | Variation rows, unit price, discount percentages, the extra discount as a real cart rule, the quantity stepper, the wishlist control — and the card's brand, badges, rating count and discount pill |
+| `plugin/nvm-variation-rows` | Variation rows, unit price, discount percentages, the extra discount as a real cart rule, the quantity steppers on the product page and in the side cart, the wishlist control — and the card's brand, badges, rating count and discount pill |
 | `elementor-template/` | The Single Product template and the Product Archive template |
 | `mockup/` | The approved static mockup — the visual contract the build is checked against |
 
@@ -136,6 +136,53 @@ score in the accent colour and the remainder in pale grey.
 the card call it. Two implementations would drift the first time the rule changed — rounding, tax
 mode, what a variable product's headline price is — and the archive would keep advertising a
 discount the product page no longer charged.
+
+## The side cart
+
+The panel is Elementor Pro's `woocommerce-menu-cart` widget in the header, not a template of ours.
+Three things about it are worth knowing before touching it again.
+
+**It is styled entirely through CSS custom properties.** Elementor emits every control as a
+variable on the widget element — `--checkout-button-background-color`, `--cart-padding`,
+`--divider-color` — and its own stylesheet consumes them. So a control left unset does not fall
+back to the theme: it falls back to *Elementor's* default. The checkout button was grey because
+`--checkout-button-background-color` was never defined and the shipped default is `#69727d`.
+Setting the control fixes it; no `!important` is needed, because nothing is competing.
+
+**`__main` is the panel; `__container` is the scrim.** `.elementor-menu-cart__container` is the
+full-viewport dark overlay and is already `100vw`, so sizing it does nothing at all — a "make it
+full-screen on mobile" rule written against it is a silent no-op. The panel is
+`.elementor-menu-cart__main`, and Elementor hard-codes it to `width: 350px` with no control, which
+is what made "Finalizar compra" wrap onto two lines.
+
+**Buttons at the foot.** The native *buttons position: bottom* control sets `margin-top: auto` on
+the buttons only, which strands the subtotal up under the last product with the gap in between.
+The scoped CSS puts that one auto margin on the subtotal instead, so the total and the action sink
+together. Two auto margins would split the free space and reopen the gap.
+
+### The quantity stepper
+
+The mini cart is a receipt in WooCommerce: it prints `2 × 25,20 €` as text. Making it editable is
+not styling — a new quantity has to re-run the cart, because the line total, the subtotal, the
+coupons and this plugin's extra discount are all server-side. So this is the one part of the
+storefront that ships JavaScript, and it lives in the plugin (`NVM_VR_Mini_Cart`) behind a nonce
+and a cart-key lookup rather than in a widget's custom-code field.
+
+The script is deliberately tiny: it posts the new quantity and asks WooCommerce to repaint via
+`wc_fragment_refresh`. It never writes the new figure itself — that would be a second, private
+copy of a number only the cart can compute.
+
+**The line shows `line_total`, not `quantity × price`.** The extra discount is a *cart* rule, so
+the product still carries its catalogue price; multiplying it printed `25,20 €` on a line the
+customer was charged `20,16 €` for, directly above a subtotal that said `20,16 €`.
+`line_total` is the figure WooCommerce adds up to reach that subtotal, so the two cannot drift.
+
+**Two traps when verifying a change here.** `wc-cart-fragments` caches the rendered panel in
+`sessionStorage` and will keep serving the pre-deploy HTML until the cart changes — trigger
+`wc_fragment_refresh` or the fix looks like it never landed. And
+`wc_display_cart_prices_including_tax()` **no longer exists in WooCommerce 11**; guarding it with
+`function_exists()` fails the worst way available, silently taking the ex-tax branch and showing
+`16,66 €` for a `20,16 €` line. Use `WC()->cart->display_prices_including_tax()`.
 
 ## Colours
 

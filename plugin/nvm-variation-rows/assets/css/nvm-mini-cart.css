@@ -1,0 +1,88 @@
+/**
+ * Quantity stepper inside the mini cart.
+ *
+ * Same shape and the same tokens as the stepper in the buy box, one size down: the control the
+ * shopper met on the product page should not become a different control in the panel.
+ */
+
+.nvm-mc {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 6px;
+}
+
+.nvm-mc__stepper {
+	display: inline-grid;
+	grid-template-columns: 26px 30px 26px;
+	align-items: center;
+	height: 30px;
+	border: 1px solid var(--nvm-line, #dcdcdf);
+	border-radius: var(--nvm-radius, 8px);
+	background: #fff;
+	overflow: hidden;
+}
+
+/* Busy rather than disabled: the control keeps its size, so the panel does not jump while the
+   cart is recalculating. */
+.nvm-mc__stepper.is-busy {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Scoped through the wrapper, and repeated under Elementor's panel with !important, for the
+   same reason as the buy-box stepper: themes paint every button, and a losing specificity war
+   leaves no trace in the markup — the control simply vanishes. */
+.nvm-mc .nvm-mc__btn,
+.elementor-menu-cart__main .nvm-mc .nvm-mc__btn {
+	height: 100%;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: none !important;
+	box-shadow: none !important;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1;
+	cursor: pointer;
+	color: var(--nvm-ink-muted, #84848d) !important;
+	transition: color 0.2s var(--nvm-ease, ease);
+}
+
+.nvm-mc .nvm-mc__btn--plus,
+.elementor-menu-cart__main .nvm-mc .nvm-mc__btn--plus {
+	color: var(--nvm-accent, #e2007a) !important;
+}
+
+.nvm-mc .nvm-mc__btn:hover:not(:disabled),
+.elementor-menu-cart__main .nvm-mc .nvm-mc__btn:hover:not(:disabled) {
+	color: var(--nvm-ink, #26262b) !important;
+}
+
+.nvm-mc .nvm-mc__btn:disabled,
+.elementor-menu-cart__main .nvm-mc .nvm-mc__btn:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+
+/* Tabular figures so the stepper does not change width between 1 and 2. */
+.nvm-mc__value {
+	text-align: center;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1;
+	color: var(--nvm-ink, #26262b);
+	font-variant-numeric: tabular-nums;
+}
+
+.nvm-mc__total {
+	font-weight: 700;
+	white-space: nowrap;
+}
+
+/* The tax suffix is a legal note for the product page; repeated on every cart line it is noise
+   beside the figure the shopper is checking. */
+.nvm-mc__total .woocommerce-price-suffix {
+	display: none;
+}
