@@ -1,13 +1,17 @@
 <?php
 /**
- * Builds the JetWooBuilder product card and the Elementor Pro archive page from code, and
- * exposes the one-click "Reconstruir plantilla del listado" action in
- * Ajustes > Productos > Filas de variación.
+ * Builds the storefront from code and exposes the one-click "Instalar plantillas NovaMira"
+ * action in Ajustes > Productos > Filas de variación: the JetWooBuilder product card, the
+ * Elementor Pro archive page, the JetWooBuilder wiring those need, and the side cart restyle
+ * (NVM_VR_Side_Cart) on whatever header the site already has.
  *
  * Adapted from elementor-template/es-nvm-product-archive.php (the standalone script run through
- * the NovaMira connector) so any site that installs this plugin gets the same card without a
- * manual execute-php step — JetWooBuilder and Elementor Pro still have to be installed
- * separately, this only wires the template once they are.
+ * the NovaMira connector) so any site that installs this plugin gets the same storefront without
+ * a manual execute-php step — Elementor Pro and JetWooBuilder still have to be installed
+ * separately, this only wires the templates once they are.
+ *
+ * The two halves are gated separately. Elementor alone is enough for the side cart, and a shop
+ * without JetWooBuilder gets everything that does not depend on it rather than nothing at all.
  *
  * Colours are not baked in as literal hex: they are the same `var(--nvm-x)` custom properties
  * the buy-box already uses (see NVM_VR_Settings), so a colour change in Ajustes takes effect on
@@ -553,11 +557,26 @@ class NVM_VR_Archive_Builder {
 	 * @return array<string,mixed>
 	 */
 	public static function build_all() {
-		$card = self::build_card();
-		$page = self::build_page();
+		// The side cart is not a template of ours: it is Elementor's menu-cart widget sitting in
+		// whatever header the site already has. This restyles the ones it finds rather than
+		// shipping a header, which would mean overwriting the client's own branding.
+		//
+		// It runs first and unconditionally, because it is the one piece here that needs neither
+		// JetWooBuilder nor a product loop — a shop with no Jet still has a cart panel, and
+		// gating it behind the card would leave that shop with nothing.
+		$side_cart = NVM_VR_Side_Cart::apply_to_all();
 
-		self::wire_jet( $card );
-		$retired = self::retire_others( $page );
+		$card    = 0;
+		$page    = 0;
+		$retired = array();
+
+		if ( self::jet_ready() ) {
+			$card = self::build_card();
+			$page = self::build_page();
+
+			self::wire_jet( $card );
+			$retired = self::retire_others( $page );
+		}
 
 		if ( class_exists( '\ElementorPro\Modules\ThemeBuilder\Module' ) ) {
 			$manager = \ElementorPro\Modules\ThemeBuilder\Module::instance()->get_conditions_manager();
@@ -577,6 +596,7 @@ class NVM_VR_Archive_Builder {
 			'card'       => $card,
 			'page'       => $page,
 			'retired'    => $retired,
+			'side_cart'  => $side_cart,
 			'conditions' => get_option( 'elementor_pro_theme_builder_conditions' )['archive'] ?? array(),
 		);
 	}
@@ -589,7 +609,20 @@ class NVM_VR_Archive_Builder {
 	 * @return bool
 	 */
 	private static function dependencies_ready() {
-		return class_exists( '\Elementor\Plugin' ) && post_type_exists( 'jet-woo-builder' );
+		return class_exists( '\Elementor\Plugin' );
+	}
+
+	/**
+	 * Whether the product card can be built on top of that.
+	 *
+	 * JetWooBuilder registers the `jet-woo-builder` post type; it has no public class or constant
+	 * of its own worth trusting across versions. Separate from dependencies_ready() because the
+	 * side cart needs Elementor only — a shop without Jet should still get everything else.
+	 *
+	 * @return bool
+	 */
+	private static function jet_ready() {
+		return post_type_exists( 'jet-woo-builder' );
 	}
 
 	/**
@@ -625,12 +658,33 @@ class NVM_VR_Archive_Builder {
 			delete_transient( $transient_key );
 
 			echo '<tr><td colspan="2"><div class="notice notice-success inline"><p>';
-			printf(
-				/* translators: 1: card template id, 2: archive page template id. */
-				esc_html__( 'Listo. Tarjeta #%1$d y archivo #%2$d actualizados.', 'nvm-variation-rows' ),
-				(int) $result['card'],
-				(int) $result['page']
-			);
+
+			// Reported separately rather than as one "done": with JetWooBuilder inactive the card
+			// and the archive are genuinely not built, and a message that claimed otherwise would
+			// send someone looking for a template that was never written.
+			if ( $result['card'] && $result['page'] ) {
+				printf(
+					/* translators: 1: card template id, 2: archive page template id. */
+					esc_html__( 'Listo. Tarjeta #%1$d y archivo #%2$d actualizados.', 'nvm-variation-rows' ),
+					(int) $result['card'],
+					(int) $result['page']
+				);
+			} else {
+				echo esc_html__( 'Listo, sin la tarjeta del listado: hace falta JetWooBuilder activo para construirla.', 'nvm-variation-rows' );
+			}
+
+			if ( ! empty( $result['side_cart'] ) ) {
+				$carts = wp_list_pluck( $result['side_cart'], 'title' );
+				echo ' ' . esc_html(
+					sprintf(
+						/* translators: %s: comma-separated list of template titles. */
+						__( 'Carrito lateral ajustado en: %s.', 'nvm-variation-rows' ),
+						implode( ', ', $carts )
+					)
+				);
+			} else {
+				echo ' ' . esc_html__( 'No se encontró ningún widget de carrito en las plantillas; el carrito lateral se queda como estaba.', 'nvm-variation-rows' );
+			}
 
 			if ( ! empty( $result['retired'] ) ) {
 				$titles = wp_list_pluck( $result['retired'], 'title' );
@@ -649,8 +703,8 @@ class NVM_VR_Archive_Builder {
 		echo '<tr><th scope="row">' . esc_html__( 'Plantilla', 'nvm-variation-rows' ) . '</th><td>';
 
 		if ( ! self::dependencies_ready() ) {
-			echo '<p class="description">' . esc_html__( 'Necesita Elementor y JetWooBuilder activos para reconstruir la plantilla.', 'nvm-variation-rows' ) . '</p>';
-			submit_button( __( 'Reconstruir tarjeta y archivo', 'nvm-variation-rows' ), 'secondary', 'submit', false, array( 'disabled' => 'disabled' ) );
+			echo '<p class="description">' . esc_html__( 'Necesita Elementor activo. JetWooBuilder solo hace falta para la tarjeta del listado.', 'nvm-variation-rows' ) . '</p>';
+			submit_button( __( 'Instalar plantillas NovaMira', 'nvm-variation-rows' ), 'secondary', 'submit', false, array( 'disabled' => 'disabled' ) );
 			echo '</td></tr>';
 			return;
 		}
@@ -658,7 +712,7 @@ class NVM_VR_Archive_Builder {
 		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		wp_nonce_field( self::ACTION );
 		echo '<input type="hidden" name="action" value="' . esc_attr( self::ACTION ) . '" />';
-		submit_button( __( 'Reconstruir tarjeta y archivo', 'nvm-variation-rows' ), 'secondary', 'submit', false );
+		submit_button( __( 'Instalar plantillas NovaMira', 'nvm-variation-rows' ), 'secondary', 'submit', false );
 		echo '</form></td></tr>';
 	}
 }
