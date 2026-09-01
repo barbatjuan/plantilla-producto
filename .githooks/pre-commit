@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Build before the commit, not after: the build refuses to package a plugin whose header version
+# and NVM_VR_VERSION constant disagree, and that is a mistake far cheaper to catch here than on
+# a live site, where it shows up as a stylesheet that will not refresh.
+#
+# The zip itself is gitignored, so this hook never touches the index - it only refreshes a file.
+
+exec "$(dirname "$0")/refresh-plugin-zip"

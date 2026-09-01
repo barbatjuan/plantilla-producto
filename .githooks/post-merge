@@ -1,0 +1,4 @@
+#!/bin/sh
+# A pull can bring in a new plugin version. Rebuild so the zip at the root is the one just merged.
+
+exec "$(dirname "$0")/refresh-plugin-zip"

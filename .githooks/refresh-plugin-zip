@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# Rebuilds the installable plugin zip at the repository root.
+#
+# Shared by every hook that can leave the working tree holding a different plugin than the zip
+# beside it does: committing, merging and switching branches. A zip labelled 1.2.0 that contains
+# 1.1.6 is worse than no zip at all, because nothing about it looks wrong until the site
+# misbehaves.
+#
+# Git runs hooks from the top of the working tree, so the relative path is safe.
+
+if ! command -v powershell >/dev/null 2>&1; then
+	echo "refresh-plugin-zip: powershell not found, skipping the plugin build." >&2
+	exit 0
+fi
+
+powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-plugin.ps1

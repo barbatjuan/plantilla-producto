@@ -27,13 +27,51 @@ and the struck price, all reading the same numbers as the product page.
 
 ## Install
 
-1. **Plugin** — zip the `plugin/nvm-variation-rows` folder and upload it under
-   Plugins → Add New → Upload, or drop the folder straight into `wp-content/plugins/`.
+1. **Plugin** — upload `nvm-variation-rows-<version>.zip` from the repository root under
+   Plugins → Add New → Upload, or drop `plugin/nvm-variation-rows` straight into
+   `wp-content/plugins/`. The zip is a build artifact, not a tracked file: see **The zip at the
+   root** below for what keeps it current.
 2. **Template** — Templates → Theme Builder → Import, and feed it
    `elementor-template/nvm-ficha-producto-template.json`.
 3. **Assign the condition** — set the template to `include/product`, or to the categories that
    should use it. Without a condition the template exists and renders nowhere; that is the most
    common reason a correct import appears to do nothing.
+
+## The zip at the root
+
+`nvm-variation-rows-<version>.zip` sits at the top of the repository, ready to upload. It is
+gitignored — a zip is a rebuildable artifact, and committing one adds a binary that changes in
+full on every edit and can silently disagree with the source beside it.
+
+```bash
+powershell -ExecutionPolicy Bypass -File tools/build-plugin.ps1
+```
+
+Three git hooks in `.githooks/` run that for you, at each moment the working tree can start
+disagreeing with the zip beside it: `pre-commit`, `post-merge` and `post-checkout`. They are
+registered per clone, so **after cloning, run this once**:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+Three things the build does that a plain `zip -r` does not:
+
+- **It refuses a version mismatch.** The version is read from the plugin header, and the build
+  aborts if `NVM_VR_VERSION` disagrees with it. Both are edited by hand, and bumping only one
+  ships a plugin whose stylesheets keep the old `?ver=` — the browser then serves the cached CSS
+  and a deployed change looks like it never landed.
+- **It packages from git, not from the folder.** `git ls-files --cached --others
+  --exclude-standard` is the file list, so uncommitted work is included but editor leftovers and
+  anything gitignored cannot reach a release.
+- **It names the entries itself.** Both `Compress-Archive` and `ZipFile::CreateFromDirectory`
+  write them with backslashes on Windows, which the zip format does not permit. Windows unpacks
+  such an archive anyway, so it looks fine locally — but PHP reads the names literally and
+  WordPress lands eighteen loose files called `nvm-variation-rows\includes\class-….php`, with the
+  plugin nowhere in the list. The build checks its own output for this before reporting success.
+
+Only one zip survives a build; the previous one is deleted. "The latest version" is not a claim
+worth making next to three older ones.
 
 ## Setting up a product
 
@@ -114,11 +152,14 @@ build time.
 ## Repository layout
 
 ```
+nvm-variation-rows-*.zip       the installable build, rebuilt by the hooks (gitignored)
 plugin/nvm-variation-rows/     the installable plugin
 elementor-template/
   ├── *.json                   importable Theme Builder template
   └── es-nvm-product-single.php  build script (NovaMira / raw PHP), reads the kit palette
 mockup/                        approved static mockup, the visual contract
+tools/build-plugin.ps1         packages the plugin into the zip at the root
+.githooks/                     rebuild the zip on commit, merge and branch checkout
 ```
 
 ## Known gaps

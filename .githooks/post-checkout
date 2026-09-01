@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# $3 is 1 for a branch checkout and 0 for a file checkout. Only the former can change the plugin
+# wholesale, and rebuilding on every "git checkout -- some/file" would be noise.
+
+[ "$3" = "1" ] || exit 0
+
+exec "$(dirname "$0")/refresh-plugin-zip"
