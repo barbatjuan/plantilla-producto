@@ -496,10 +496,11 @@ class NVM_VR_Archive_Builder {
 	 * Retire another template that claims the archive, keeping its conditions so the swap is
 	 * reversible without rebuilding anything.
 	 *
-	 * @param int $keep_id The template that should own the archive.
+	 * @param int    $keep_id The template that should own this slot.
+	 * @param string $type    Elementor template type to sweep, e.g. product-archive or product.
 	 * @return array<int,array<string,mixed>> What was retired.
 	 */
-	public static function retire_others( $keep_id ) {
+	public static function retire_others( $keep_id, $type = 'product-archive' ) {
 		$retired   = array();
 		$templates = get_posts(
 			array(
@@ -507,7 +508,7 @@ class NVM_VR_Archive_Builder {
 				'post_status'    => 'publish',
 				'posts_per_page' => -1,
 				'meta_key'       => '_elementor_template_type',
-				'meta_value'     => 'product-archive',
+				'meta_value'     => $type,
 			)
 		);
 
@@ -566,16 +567,29 @@ class NVM_VR_Archive_Builder {
 		// gating it behind the card would leave that shop with nothing.
 		$side_cart = NVM_VR_Side_Cart::apply_to_all();
 
-		$card    = 0;
-		$page    = 0;
 		$retired = array();
+
+		// The product page needs Elementor Pro and nothing else, so it goes in beside the side
+		// cart rather than behind the JetWooBuilder gate.
+		$product = NVM_VR_Product_Builder::build();
+
+		if ( is_wp_error( $product ) ) {
+			$product = 0;
+		} else {
+			// Appended, never assigned: the archive sweep below retires a different template type
+			// and overwriting here would silently drop whatever this one found.
+			$retired = array_merge( $retired, self::retire_others( $product, 'product' ) );
+		}
+
+		$card = 0;
+		$page = 0;
 
 		if ( self::jet_ready() ) {
 			$card = self::build_card();
 			$page = self::build_page();
 
 			self::wire_jet( $card );
-			$retired = self::retire_others( $page );
+			$retired = array_merge( $retired, self::retire_others( $page, 'product-archive' ) );
 		}
 
 		if ( class_exists( '\ElementorPro\Modules\ThemeBuilder\Module' ) ) {
@@ -593,6 +607,7 @@ class NVM_VR_Archive_Builder {
 		\Elementor\Plugin::$instance->files_manager->clear_cache();
 
 		return array(
+			'product'    => $product,
 			'card'       => $card,
 			'page'       => $page,
 			'retired'    => $retired,
@@ -662,15 +677,25 @@ class NVM_VR_Archive_Builder {
 			// Reported separately rather than as one "done": with JetWooBuilder inactive the card
 			// and the archive are genuinely not built, and a message that claimed otherwise would
 			// send someone looking for a template that was never written.
+			if ( ! empty( $result['product'] ) ) {
+				printf(
+					/* translators: %d: product page template id. */
+					esc_html__( 'Ficha de producto #%d instalada.', 'nvm-variation-rows' ),
+					(int) $result['product']
+				);
+			} else {
+				echo esc_html__( 'La ficha de producto no se pudo instalar: falta el JSON en el plugin.', 'nvm-variation-rows' );
+			}
+
 			if ( $result['card'] && $result['page'] ) {
 				printf(
 					/* translators: 1: card template id, 2: archive page template id. */
-					esc_html__( 'Listo. Tarjeta #%1$d y archivo #%2$d actualizados.', 'nvm-variation-rows' ),
+					' ' . esc_html__( 'Tarjeta #%1$d y archivo #%2$d actualizados.', 'nvm-variation-rows' ),
 					(int) $result['card'],
 					(int) $result['page']
 				);
 			} else {
-				echo esc_html__( 'Listo, sin la tarjeta del listado: hace falta JetWooBuilder activo para construirla.', 'nvm-variation-rows' );
+				echo ' ' . esc_html__( 'Sin la tarjeta del listado: hace falta JetWooBuilder activo para construirla.', 'nvm-variation-rows' );
 			}
 
 			if ( ! empty( $result['side_cart'] ) ) {

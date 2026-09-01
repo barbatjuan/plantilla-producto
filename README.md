@@ -28,14 +28,28 @@ and the struck price, all reading the same numbers as the product page.
 ## Install
 
 1. **Plugin** — upload `nvm-variation-rows-<version>.zip` from the repository root under
-   Plugins → Add New → Upload, or drop `plugin/nvm-variation-rows` straight into
-   `wp-content/plugins/`. The zip is a build artifact, not a tracked file: see **The zip at the
-   root** below for what keeps it current.
-2. **Template** — Templates → Theme Builder → Import, and feed it
-   `elementor-template/nvm-ficha-producto-template.json`.
-3. **Assign the condition** — set the template to `include/product`, or to the categories that
-   should use it. Without a condition the template exists and renders nowhere; that is the most
-   common reason a correct import appears to do nothing.
+   Plugins → Add New → Upload. The zip is a build artifact, not a tracked file: see **The zip at
+   the root** below for what keeps it current.
+2. **Press the button** — WooCommerce → Ajustes → Productos → Filas de variación →
+   **Instalar plantillas NovaMira**.
+
+That is the whole install. The button writes the product page, the archive page and the
+JetWooBuilder card, registers their Theme Builder conditions, points JetWooBuilder at the card in
+a render mode a scripted template survives, retires any older template still claiming those slots
+(keeping its conditions so the swap is reversible), and restyles the side cart in whatever header
+the site already has.
+
+Rerunning it is safe: every piece is looked up by slug and rewritten, never duplicated.
+
+**Two things it deliberately does not do.** It never builds or overwrites a header — that carries
+the client's logo, menu and calls to action, and replacing all of it to deliver a cart panel would
+trade something they own for something we own; only the menu-cart widgets already there are
+restyled. And it never touches the palette: every colour it writes is a `var(--nvm-x)` token, so
+the storefront follows WooCommerce → Ajustes → Productos → Filas de variación on the new site
+rather than arriving in this one's brand.
+
+JetWooBuilder is needed only for the listing card. Without it the button still installs everything
+else and says so, instead of refusing to run.
 
 ## The zip at the root
 
@@ -190,24 +204,35 @@ The plugin follows the site: every colour is a CSS custom property that falls ba
 Elementor global colour, and each one can be pinned in
 WooCommerce → Settings → Products → Variation rows.
 
-**The exported template does not.** Its JSON carries the hex values resolved from the kit it was
-built against, so importing it into a site with a different palette brings the old colours along.
-Either retune them after importing, or rebuild the template from
-`elementor-template/es-nvm-product-single.php`, which reads the destination kit's palette at
-build time.
+**The raw export does not** — which is why the installer does not use it raw. Elementor bakes the
+literal hex of the kit a template was built against, so importing
+`elementor-template/nvm-ficha-producto-template.json` by hand through Theme Builder brings this
+site's colours along. `NVM_VR_Product_Builder` rewrites them to tokens as it reads the bundled copy
+of that same export, which is what makes the product page palette-agnostic.
+
+The substitution is a substring, not a whole value. About a third of the page's colours live inside
+`custom_css` strings — the add-to-cart green, the tab rule, the review link — and matching only
+whole values left exactly those behind, still carrying one site's brand into the next.
 
 ## Repository layout
 
 ```
 nvm-variation-rows-*.zip       the installable build, rebuilt by the hooks (gitignored)
-plugin/nvm-variation-rows/     the installable plugin
+plugin/nvm-variation-rows/     the installable plugin — and the whole storefront installer
+  └── assets/templates/*.json  the product page export the installer reads and tokenises
 elementor-template/
-  ├── *.json                   importable Theme Builder template
-  └── es-nvm-product-single.php  build script (NovaMira / raw PHP), reads the kit palette
+  ├── *.json                   the same export, as authored (source for the bundled copy)
+  ├── es-nvm-product-single.php  build script for the product page (NovaMira / raw PHP)
+  └── es-nvm-product-archive.php build script for the card and archive
 mockup/                        approved static mockup, the visual contract
 tools/build-plugin.ps1         packages the plugin into the zip at the root
 .githooks/                     rebuild the zip on commit, merge and branch checkout
 ```
+
+The build scripts under `elementor-template/` remain the place the templates are *authored*,
+through the NovaMira connector, against a live site. The plugin is how they are *delivered*: the
+card and archive are transcribed into `NVM_VR_Archive_Builder`, and the product page is shipped as
+the script's own export so there is no second copy of a hundred controls to drift.
 
 ## Known gaps
 
