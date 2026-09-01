@@ -140,26 +140,6 @@ function nvm_global( array $el, $control, $global_id ) {
 	return $el;
 }
 
-/** Brand logo widget, or nothing when the attachment is missing. */
-function nvm_logo() {
-	$img = function_exists( 'es_img' ) ? es_img( 'logo-algodonera-del-norte' ) : null;
-
-	if ( empty( $img['id'] ) ) {
-		return es_w( 'text-editor', array( 'editor' => '', 'custom_css' => 'selector{display:none;}' ) );
-	}
-
-	return es_w(
-		'image',
-		array(
-			'image'      => array( 'id' => $img['id'], 'url' => $img['url'] ),
-			'image_size' => 'full',
-			'width'      => es_size( 160 ),
-			'align'      => 'right',
-			'_margin'    => es_box( 0, 0, 0, 0 ),
-		)
-	);
-}
-
 /** Zero padding: nested containers otherwise inherit the kit default and lose the card alignment. */
 function nvm_flat( array $settings ) {
 	$settings['padding'] = es_box( 0, 0, 0, 0 );
@@ -227,14 +207,20 @@ function nvm_build_product_single() {
 							)
 						),
 						array(
+							/*
+							 * The brand, through the plugin's own shortcode and the widget built to run
+							 * one - the same path the archive card takes. It prints the taxonomy term,
+							 * or nothing at all when the product has no brand. Never a literal name:
+							 * this page is installed on sites that have never heard of the one it was
+							 * authored against.
+							 */
 							es_w(
-								'text-editor',
+								'shortcode',
 								array(
-									'editor'                => '<p>Algodonera del Norte</p>',
-									'text_color'            => nvm_color( 'text', '#6A6F6C' ),
-									'typography_typography' => 'custom',
-									'typography_font_size'  => es_size( 12 ),
-									'custom_css'            => 'selector p{margin:0;}',
+									'shortcode'  => '[nvm_brand]',
+									/* The span, not the wrapper: nvm-archive.css also loads on the product page
+									   and sizes .nvm-brand at the 13px the card wants. */
+									'custom_css' => 'selector .nvm-brand{display:block;font-size:12px;line-height:1.4;color:' . nvm_color( 'text', '#6A6F6C' ) . ';}',
 								)
 							),
 							/* The widget renders its own `title` control, which defaults to
@@ -258,15 +244,20 @@ function nvm_build_product_single() {
 								'title',
 								'post-title'
 							),
-							es_w(
-								'text-editor',
-								array(
-									'editor'                => '<p>Calcetines de algodón orgánico</p>',
-									'text_color'            => nvm_color( 'text', '#6A6F6C' ),
-									'typography_typography' => 'custom',
-									'typography_font_size'  => es_size( 12 ),
-									'custom_css'            => 'selector p{margin:0;}',
-								)
+							/* The product's short description. Same binding as the title above: the
+							   widget has no idea which post it renders on unless a tag tells it. */
+							nvm_dynamic(
+								es_w(
+									'text-editor',
+									array(
+										'text_color'            => nvm_color( 'text', '#6A6F6C' ),
+										'typography_typography' => 'custom',
+										'typography_font_size'  => es_size( 12 ),
+										'custom_css'            => 'selector p{margin:0;}',
+									)
+								),
+								'editor',
+								'post-excerpt'
 							),
 						),
 						true
@@ -283,7 +274,12 @@ function nvm_build_product_single() {
 							)
 						),
 						array(
-							nvm_logo(),
+							/*
+							 * No brand mark here. This page is shipped inside the plugin and installed
+							 * on whichever site runs the installer, while an image widget carries the
+							 * attachment id AND the absolute URL of the site it was authored on. The
+							 * export then hotlinks that site's logo on every product of the next one.
+							 */
 							es_w(
 								'woocommerce-product-rating',
 								array(
@@ -298,7 +294,9 @@ function nvm_build_product_single() {
 							es_w(
 								'button',
 								array(
-									'text'                          => 'FAQ (0)',
+									/* The count was mockup copy - a button widget cannot compute one.
+									   The anchor is real: the tabs widget at the bottom prints it. */
+									'text'                          => 'OPINIONES',
 									'link'                          => array( 'url' => '#tab-title-reviews' ),
 									'size'                          => 'xs',
 									'background_color'              => nvm_color( 'primary', '#15181A' ),
@@ -317,6 +315,24 @@ function nvm_build_product_single() {
 					),
 				),
 				true
+			),
+
+			/*
+			 * Price. NVM_VR_Renderer::is_supported() only accepts a variable product with exactly
+			 * one attribute, and on those the row list is what carries the price. Everything else -
+			 * every simple product, every variable one with two attributes - reached this page with
+			 * no price anywhere at all. This widget covers them, and nvm-variation-rows.css hides
+			 * it again wherever the rows do render: that stylesheet loads nowhere else.
+			 */
+			es_w(
+				'woocommerce-product-price',
+				array(
+					'_css_classes' => 'nvm-pdp-price',
+					'_margin'      => es_box( 0, 0, 0, 0 ),
+					'custom_css'   => 'selector .price{margin:0;display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font-size:22px;font-weight:700;line-height:1.2;color:' . nvm_color( 'primary', '#15181A' ) . ';}'
+						. 'selector .price del{font-size:13px;font-weight:400;color:' . nvm_color( 'text', '#6A6F6C' ) . ';opacity:1;}'
+						. 'selector .price ins{text-decoration:none;background:none;color:' . nvm_color( 'primary', '#15181A' ) . ';}',
+				)
 			),
 
 			/* The plugin turns this native widget into the row selector + total + CTA. */
@@ -338,21 +354,15 @@ function nvm_build_product_single() {
 					/* The theme button colour otherwise wins the specificity war. */
 					'custom_css'                       => 'selector .single_add_to_cart_button{background-color:' . nvm_color( 'secondary', '#0FA968' ) . '!important;border-color:' . nvm_color( 'secondary', '#0FA968' ) . '!important;color:#fff!important;border-radius:8px!important;min-height:48px;transition:filter .25s cubic-bezier(.22,1,.36,1),transform .25s cubic-bezier(.22,1,.36,1)!important;}'
 						. 'selector .single_add_to_cart_button:hover{filter:brightness(1.08);transform:translateY(-1px);}'
-						. 'selector .quantity input{height:44px;}'
-						. 'selector .woocommerce-variation-price{display:none;}'
-						/* The mockup has no reset link: the row list always shows a selection. */
-						. 'selector .reset_variations{display:none!important;}',
-				)
-			),
-
-			es_w(
-				'text-editor',
-				array(
-					'editor'                => '<p>Paga en 3 plazos sin intereses tus compras de 20 € a 2.000 €. 0% TAE. <a href="#">Más información</a></p>',
-					'text_color'            => nvm_color( 'text', '#6A6F6C' ),
-					'typography_typography' => 'custom',
-					'typography_font_size'  => es_size( 11 ),
-					'custom_css'            => 'selector p{margin:0;}selector a{color:' . nvm_color( 'primary', '#15181A' ) . ';text-decoration:underline;}',
+						. 'selector .quantity input{height:44px;}',
+					/*
+					 * The variation price and the reset link are hidden from
+					 * nvm-variation-rows.css rather than from here. That stylesheet loads only on
+					 * pages where the plugin actually renders rows, while these two rules baked
+					 * into the template also stripped the price and the reset link from every
+					 * variable product the renderer does not support - which has neither a row
+					 * list nor a total to put in their place.
+					 */
 				)
 			),
 		),
@@ -434,7 +444,7 @@ function nvm_build_product_single() {
 	 * on every product of the catalogue, so each extra level is paid site-wide.
 	 *
 	 * $lead decides which line carries the weight: "PACKS OFERTA" leads with its label, while the
-	 * delivery card leads with the small "Entrega prevista" and gives the date the emphasis.
+	 * delivery card leads with the small "Entrega prevista" and gives the estimate the emphasis.
 	 */
 	$card = function ( $title, $description, $icon, $symbol, $lead = 'title' ) {
 		$strong = 'font-size:12px;font-weight:700;color:' . nvm_color( 'primary', '#15181A' ) . ';';
@@ -475,7 +485,9 @@ function nvm_build_product_single() {
 		2,
 		array(
 			$card( 'PACKS OFERTA', 'Ver productos comprados juntos habitualmente', 'fas fa-link', '↓' ),
-			$card( 'Entrega prevista', 'Península: lunes 17/08/2026', 'fas fa-truck', '+', 'description' ),
+			/* No baked date. The export is installed months after it is authored, on sites with
+			   their own carriers, so a fixed date is wrong on arrival and worse every day after. */
+			$card( 'Entrega prevista', 'Calculada en el carrito', 'fas fa-truck', '+', 'description' ),
 		),
 		16,
 		nvm_flat(

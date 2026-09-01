@@ -9,6 +9,27 @@
    This stylesheet is only enqueued on products that actually render rows, so the
    selectors need no extra gate — and nothing flashes before the script boots. */
 
+/* The row list prints the unit price and the total, so the template's price widget would state
+   it a second time. That widget exists for every product this plugin does NOT take over — a
+   simple product, or a variable one with more than one attribute, both of which used to reach
+   the page with no price at all — and it is hidden here, where the rows are rendering by
+   definition. */
+.nvm-pdp-price {
+	display: none;
+}
+
+/* Same gate, and the reason these two live here rather than in the template's custom CSS:
+   baked into the export they also applied to the variable products the renderer skips, which
+   have no row list and no total, and were left with neither a price nor a way back to an
+   unselected state. */
+.woocommerce div.product form.cart .woocommerce-variation-price {
+	display: none;
+}
+
+.woocommerce div.product form.cart .reset_variations {
+	display: none !important;
+}
+
 /* The buy-box card is the only surface. A theme that also paints the cart form stacks a
    second panel inside the first, and the two greys read as a seam the reference has not. */
 .woocommerce div.product form.cart,

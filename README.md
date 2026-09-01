@@ -69,7 +69,7 @@ registered per clone, so **after cloning, run this once**:
 git config core.hooksPath .githooks
 ```
 
-Three things the build does that a plain `zip -r` does not:
+Four things the build does that a plain `zip -r` does not:
 
 - **It refuses a version mismatch.** The version is read from the plugin header, and the build
   aborts if `NVM_VR_VERSION` disagrees with it. Both are edited by hand, and bumping only one
@@ -83,6 +83,14 @@ Three things the build does that a plain `zip -r` does not:
   such an archive anyway, so it looks fine locally — but PHP reads the names literally and
   WordPress lands eighteen loose files called `nvm-variation-rows\includes\class-….php`, with the
   plugin nowhere in the list. The build checks its own output for this before reporting success.
+- **It audits the product page export.** That page ships as the export of the script that
+  authored it — which means the authoring site rides along inside it. An image widget carries
+  the absolute URL of the server it was built on, a text widget carries whatever copy was on
+  screen that afternoon, and both then reach every product of every site the installer runs on.
+  The build aborts on an absolute URL, on a hardcoded date, on a brand line that is not
+  `[nvm_brand]`, on a short description that is not the dynamic tag, on a buy box with no price
+  widget, and when the bundled copy and `elementor-template/nvm-ficha-producto-template.json`
+  disagree.
 
 Only one zip survives a build; the previous one is deleted. "The latest version" is not a claim
 worth making next to three older ones.
@@ -214,6 +222,13 @@ The substitution is a substring, not a whole value. About a third of the page's 
 `custom_css` strings — the add-to-cart green, the tab rule, the review link — and matching only
 whole values left exactly those behind, still carrying one site's brand into the next.
 
+Colour is not the only thing an export bakes. It carries the authoring site's **content** too:
+1.5.0 shipped an image widget still pointing at the dev server's uploads folder, a literal brand
+name, a literal short description, and a delivery date already in the past by the time anyone
+installed it — on 2864 products at once, on a site that had never heard of any of them. Those
+lines are bound now (`[nvm_brand]`, the `post-excerpt` dynamic tag) and `tools/build-plugin.ps1`
+refuses to package an export that carries their like again.
+
 ## Repository layout
 
 ```
@@ -225,7 +240,7 @@ elementor-template/
   ├── es-nvm-product-single.php  build script for the product page (NovaMira / raw PHP)
   └── es-nvm-product-archive.php build script for the card and archive
 mockup/                        approved static mockup, the visual contract
-tools/build-plugin.ps1         packages the plugin into the zip at the root
+tools/build-plugin.ps1         packages the plugin, and audits the export before it does
 .githooks/                     rebuild the zip on commit, merge and branch checkout
 ```
 
@@ -240,3 +255,9 @@ the script's own export so there is no second copy of a hundred controls to drif
   text, so showing a rating there needs a filter on the tab title.
 - Container depth in the template is 5, above the 3 this codebase aims for. It comes from the
   buy-box header splitting into two columns.
+- The buy box carries a `woocommerce-product-price` widget for the products the variation rows
+  do not take over — every simple product, and every variable one with more than one attribute,
+  all of which used to render with no price anywhere on the page. Where the rows *do* render
+  they print the unit price and the total themselves, so `nvm-variation-rows.css` hides the
+  widget again. That stylesheet is the whole gate: it is enqueued only on products the renderer
+  supports. A site that dequeues it gets the price twice.
